@@ -51,7 +51,7 @@ io.on('connection', (socket) => {
             return;
         }
 
-        let fullPrompt = `You are a code execution engine. The user has provided code in ${language}. Simulate the execution of this code and provide the exact standard output (and standard error, if any) that this code would produce when run. DO NOT provide any markdown, explanations, or code blocks. ONLY return the output as plain text. If the code requires input, act as if there is no input and respond accordingly (e.g., throwing EOF error or similar depending on language).
+        let fullPrompt = `You are a code execution engine. The user has provided code in ${language}. Simulate the execution of this code and provide the exact standard output (and standard error, if any) that this code would produce when run. DO NOT provide any markdown, explanations, or code blocks. ONLY return the output as plain text. If the code requires inputs (like Scanner, cin, input()), YOU MUST CHOOSE reasonable sample inputs yourself and pretend the user typed them. DO NOT throw EOF errors or exceptions. Simulate a completely successful run with your chosen inputs. Keep your chosen inputs simple and realistic. Print the inputs in the output as if they were echoed in the terminal.
 
 CODE:
 ${code}`;
