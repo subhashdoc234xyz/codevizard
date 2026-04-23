@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CodeViz – Master Programming Concepts</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Manrope', sans-serif; }
+
+:root {
+  --primary: #0ea5e9;        
+  --primary-glow: rgba(14, 165, 233, 0.4);
+  --primary-dark: #0284c7;
+  --bg-body: #f0f9ff;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  --bg-glass-border: rgba(255, 255, 255, 0.6);
+  --obsidian: #0f172a;
+  --obsidian-surface: #1e293b;
+  --terminal-bg: #09090b;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-light: #f8fafc;
+  --success: #10b981; 
+  --warning: #f59e0b; 
+  --danger: #ef4444;
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --shadow-neon: 0 0 15px var(--primary-glow);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --glass-filter: blur(12px) saturate(180%);
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+body { 
+    background-color: #e0f2fe;
+    background: linear-gradient(-45deg, #f0f9ff, #e0f2fe, #bae6fd, #f0f9ff);
+    background-size: 100% 100%; 
+    color: var(--text-main); 
+    min-height: 100vh; 
+    overflow-x: hidden; 
+}
+
+#introOverlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255,255,255,0.95); 
+    backdrop-filter: blur(10px);
+    color: var(--text-main);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999; flex-direction: column;
+    transition: opacity 0.8s ease-out;
+}
+#introOverlay h1 { 
+    font-size: 5rem; font-weight: 800; letter-spacing: -3px; 
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
+}
+
+header {
+  background: rgba(255, 255, 255, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 1rem 3rem; display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 100; 
+  backdrop-filter: var(--glass-filter);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+}
+header h2 { 
+    font-size: 1.8rem; font-weight: 800; display: flex; align-items: center; gap: 12px; 
+    color: var(--obsidian); letter-spacing: -1px;
+}
+header h2 i { 
+    color: var(--primary); 
+    filter: drop-shadow(0 0 8px var(--primary-glow));
+}
+
+nav a { 
+    color: var(--text-muted); text-decoration: none; font-weight: 700; 
+    margin-left: 10px; transition: var(--transition); font-size: 0.95rem; 
+    padding: 10px 20px; border-radius: 12px;
+    position: relative; overflow: hidden;
+}
+nav a:hover { color: var(--primary); background: rgba(14, 165, 233, 0.1); }
+nav a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0%; height: 2px; background: var(--primary); transition: 0.3s; }
+nav a:hover::after { width: 100%; }
+
+.menu-container { position: relative; display: inline-block; }
+.dropdown-content {
+  display: none; position: absolute; right: 0; top: 140%;
+  background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+  min-width: 240px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255,255,255,0.5); border-radius: 16px;
+  z-index: 200; overflow: hidden; padding: 8px; transform-origin: top right;
+}
+.dropdown-content a {
+  color: var(--text-main); padding: 14px 20px; text-decoration: none;
+  display: flex; align-items: center; gap: 10px;
+  transition: all 0.2s; font-weight: 600; border-radius: 10px;
+}
+.dropdown-content a:hover { background-color: var(--bg-body); color: var(--primary); transform: translateX(5px); }
+.show { display: block; animation: menuPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); } 
+@keyframes menuPop { from { opacity:0; transform:scale(0.9) translateY(-10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+
+.container { 
+    max-width: 1440px; margin: 3rem auto; padding: 0 2rem; 
+    display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 2.5rem; 
+}
+.full-width { grid-column: 1 / -1; }
+
+.section {
+  background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px);
+  border-radius: 24px; padding: 2.5rem; 
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
+  border: 1px solid rgba(255,255,255,0.8);
+  transition: var(--transition); position: relative; overflow: hidden;
+}
+.section:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 20px 40px -5px rgba(14, 165, 233, 0.15); 
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.section-title { 
+    font-size: 1.4rem; color: var(--obsidian); margin-bottom: 1.5rem; 
+    font-weight: 800; display: flex; align-items: center; gap: 12px;
+}
+.section-title i { 
+    color: white; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+    padding: 10px; border-radius: 12px; font-size: 1.1rem; 
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+}
+
+.concept-selector {
+  width: 100%; padding: 14px 20px; margin-bottom: 0; border-radius: 14px;
+  border: 2px solid #e2e8f0; background: white; 
+  font-weight: 700; color: var(--text-main); cursor: pointer;
+  outline: none; transition: var(--transition); font-size: 1rem; appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%230284c7%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat; background-position: right 1.5rem center; background-size: 0.8rem;
+}
+.concept-selector:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+
+.editor-container {
+    position: relative; width: 100%; height: 500px; border-radius: 20px; overflow: hidden;
+    background: #050505;
+    background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.9), 0 0 0 1px #1e293b;
+}
+
+textarea {
+  width: 100%; height: 100%; padding: 30px; background: transparent; color: #e2e8f0; 
+  font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 15px; line-height: 1.7;
+  border: none; outline: none; resize: none; position: relative; z-index: 5;
+}
+
+.controls { margin-top: 2rem; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+
+.btn { 
+    padding: 14px 28px; border-radius: 14px; border: none; font-weight: 700; 
+    cursor: pointer; color: white; display: flex; align-items: center; gap: 10px; font-size: 0.95rem;
+    transition: var(--transition); transform: translateY(0);
+    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.2); position: relative; overflow: hidden;
+}
+.btn-primary { background: linear-gradient(135deg, #0ea5e9, #2563eb); }
+.btn-primary:hover { box-shadow: 0 0 20px var(--primary-glow); }
+.btn-visualize { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
+.btn-visualize:hover { box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); }
+.btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+.btn-success { background: linear-gradient(135deg, #10b981, #059669); }
+.btn-info { background: linear-gradient(135deg, #0284c7, #0369a1); }
+.btn:hover:not(:disabled) { transform: translateY(-3px); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; background: #94a3b8; box-shadow: none; filter: grayscale(100%); }
+
+.speed-control { 
+    display: flex; align-items: center; gap: 15px; background: white; color: var(--text-main);
+    padding: 10px 24px; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm);
+}
+input[type="range"] { width: 120px; cursor: pointer; accent-color: var(--primary); height: 6px; background: #e2e8f0; border-radius: 5px; outline: none; }
+
+/* =============================================
+   STEP-BY-STEP EXECUTION PANEL (ENHANCED)
+   ============================================= */
+#animationCanvas { 
+    background: #ffffff; border-radius: 20px; padding: 25px; 
+    min-height: 500px; max-height: 600px; overflow-y: auto; 
+    border: 1px solid #e2e8f0; 
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.03); 
+}
+
+/* Call Stack breadcrumb bar */
+#callStackBar {
+    display: none;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 16px;
+    margin-bottom: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: #475569;
+    font-weight: 700;
+}
+#callStackBar .cs-label {
+    color: #94a3b8;
+    margin-right: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.72rem;
+}
+#callStackBar .cs-frame {
+    display: inline-block;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 2px 10px;
+    margin: 0 3px;
+    color: var(--primary-dark);
+}
+#callStackBar .cs-arrow {
+    color: #cbd5e1;
+    margin: 0 2px;
+}
+
+/* Step explanation tooltip */
+#stepExplanation {
+    display: none;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    border-left: 4px solid var(--primary);
+}
+#stepExplanation .step-num {
+    font-size: 0.72rem;
+    color: var(--primary);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.code-line { 
+    padding: 10px 16px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; 
+    transition: all 0.2s; margin-bottom: 6px; color: #64748b; font-size: 0.95rem; 
+    border-left: 4px solid transparent; 
+}
+
+/* Action-based highlight colors — the core of defeating the black box */
+.code-line.active          { background: #f0f9ff; border-left: 4px solid var(--primary);   color: var(--primary-dark); font-weight: 700; transform: translateX(8px); box-shadow: 0 2px 8px rgba(14,165,233,0.10); }
+.code-line.active-call     { background: #dbeafe; border-left: 4px solid #3b82f6;           color: #1d4ed8; font-weight: 700; transform: translateX(8px); box-shadow: 0 2px 8px rgba(59,130,246,0.12); }
+.code-line.active-return   { background: #dcfce7; border-left: 4px solid var(--success);    color: #065f46; font-weight: 700; transform: translateX(8px); box-shadow: 0 2px 8px rgba(16,185,129,0.12); }
+.code-line.active-error    { background: #fee2e2; border-left: 4px solid var(--danger);     color: #991b1b; font-weight: 700; transform: translateX(8px); box-shadow: 0 2px 8px rgba(239,68,68,0.12); }
+.code-line.active-skip     { background: #f3f4f6; border-left: 4px solid #9ca3af;           color: #6b7280; font-weight: 600; transform: translateX(8px); font-style: italic; }
+
+/* Skip step pill */
+.skip-pill {
+    display: inline-block;
+    background: #f3f4f6;
+    border: 1px dashed #9ca3af;
+    border-radius: 50px;
+    padding: 6px 18px;
+    font-size: 0.82rem;
+    color: #6b7280;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 8px 0 8px 16px;
+}
+
+#flowDiagram { min-height: 400px; display: flex; justify-content: center; align-items: center; overflow: hidden; background: white; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: inset 0 0 20px rgba(0,0,0,0.02); }
+
+.output-console { 
+    background: #09090b; color: #34d399; padding: 30px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; 
+    min-height: 160px; max-height: 300px; overflow-y: auto; border: 1px solid #333;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.8); position: relative;
+}
+.output-console::before { content: "TERMINAL"; position: absolute; top: 10px; right: 20px; font-size: 0.7rem; color: #333; font-weight: 800; letter-spacing: 2px; }
+.output-line { border-bottom: 1px solid #18181b; padding: 6px 0; text-shadow: 0 0 5px rgba(52, 211, 153, 0.4); }
+
+#outputContainer {
+    background: #000; padding: 30px; border-radius: 20px; border: 1px solid #333; 
+    min-height: 140px; font-family:'JetBrains Mono', monospace; font-size: 1.2rem; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+    background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%); 
+    background-size: 100% 4px; display: flex; flex-direction: column;
+}
+#programOutput { color: #ffffff; white-space: pre-wrap; word-wrap: break-word; flex-grow: 1; }
+#inlineInputWrapper { display: none; align-items: center; margin-top: 5px; }
+#inlineInputWrapper span { color: #10b981; font-weight: bold; margin-right: 10px; font-size: 1.2rem; }
+#inlineTerminalInput {
+    background: transparent; border: none; outline: none; color: #10b981; 
+    font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; flex: 1; 
+    border-bottom: 1px dashed rgba(16, 185, 129, 0.4);
+}
+#inlineTerminalInput:focus { border-bottom: 1px solid #10b981; }
+
+/* Variable badges — now handles objects/arrays */
+#variablesList { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.var-badge { 
+    background: white; color: var(--text-main); border: 1px solid #e2e8f0; 
+    padding: 8px 16px; border-radius: 50px; font-weight: 700; font-size: 0.9rem; 
+    animation: popIn 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+    display: flex; align-items: center; gap: 8px; max-width: 360px; overflow: hidden;
+}
+.var-badge .var-value { 
+    color: #2563eb; padding: 2px 8px; border-radius: 4px; 
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+    max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    background: #eff6ff;
+}
+/* Object/array values get a different accent */
+.var-badge .var-value.is-complex {
+    color: #7c3aed;
+    background: #f5f3ff;
+    border: 1px solid #ddd6fe;
+}
+@keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); }
+.modal-content { background: rgba(255,255,255,0.95); color: var(--text-main); padding: 3rem; width: 90%; max-width: 450px; border-radius: 30px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: slideUpModal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+@keyframes slideUpModal { from { transform: translate(-50%, -40%); opacity: 0; } to { transform: translate(-50%, -50%); opacity: 1; } }
+.close { position: absolute; right: 25px; top: 20px; font-size: 1.8rem; cursor: pointer; color: #94a3b8; transition: 0.3s; }
+.close:hover { color: var(--danger); transform: rotate(90deg); }
+.form-group label { display: block; margin-bottom: 10px; font-weight: 700; color: var(--text-main); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input { width: 100%; padding: 14px; background: #f8fafc; color: var(--text-main); border: 2px solid #e2e8f0; border-radius: 14px; outline: none; transition: 0.3s; }
+.form-group input:focus { border-color: var(--primary); background: white; }
+.modal-btn { width: 100%; padding: 14px; background: var(--obsidian); color: white; border: none; border-radius: 14px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+.modal-btn:hover { background: var(--primary); transform: translateY(-2px); }
+
+.stop-button { position: fixed; bottom: 30px; right: 110px; width: 65px; height: 65px; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.2), 0 15px 30px rgba(239, 68, 68, 0.4); display: none; align-items: center; justify-content: center; z-index: 1000; transition: transform 0.2s; background: var(--danger); color: white; font-size: 1.4rem; }
+.stop-button:hover { transform: scale(1.1) rotate(90deg); }
+
+.chat-bubble { position: fixed; bottom: 30px; right: 30px; width: 70px; height: 70px; background: #000; border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 15px 40px rgba(0,0,0,0.4); z-index: 1000; font-size: 32px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); color: white; animation: heartbeat 2s infinite; }
+@keyframes heartbeat { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7); } 50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(0, 0, 0, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); } }
+.chat-bubble:hover { animation: none; transform: scale(1.1); border-color: var(--primary); color: var(--primary); box-shadow: 0 0 30px var(--primary-glow); }
+
+.chat-window { display: none; position: fixed; bottom: 120px; right: 30px; width: 400px; height: 430px; background-color: white; border-radius: 24px; box-shadow: 0 30px 80px -20px rgba(0,0,0,0.4); flex-direction: column; overflow: hidden; z-index: 1000; border: 1px solid rgba(255,255,255,0.5); animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes slideUp { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.chat-header { background: linear-gradient(135deg, #0f172a, #334155); padding: 24px; color: white; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; font-weight: 700; position: relative; overflow: hidden; }
+.chat-messages { flex: 1; padding: 25px; overflow-y: auto; background-color: #f8fafc; display: flex; flex-direction: column; gap: 18px; background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 20px 20px; }
+.message { max-width: 85%; padding: 14px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.6; position: relative; }
+.message.user { background: linear-gradient(135deg, var(--obsidian), #334155); color: white; font-weight: 600; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 5px 15px rgba(15, 23, 42, 0.2); }
+.message.ai { background: white; border: 1px solid #e2e8f0; color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+.chat-input-area { padding: 20px; background: white; border-top: 1px solid #f1f5f9; display: flex; align-items: center; gap: 10px; }
+.chat-input-area input { flex: 1; padding: 14px; background: #f8fafc; color: var(--text-main); border: 1px solid #e2e8f0; border-radius: 50px; outline: none; transition: 0.3s; }
+.chat-input-area input:focus { border-color: var(--primary); background: white; }
+.chat-input-area button { background: var(--obsidian); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+.chat-input-area button:hover { background: var(--primary); transform: rotate(-45deg); }
+.code-wrapper { position: relative; margin: 15px 0; border-radius: 12px; overflow: hidden; border: 1px solid #333; }
+.message.ai .code-wrapper pre { background: #09090b !important; color: #e2e8f0 !important; padding: 50px 20px 20px 20px; margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+.copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+.copy-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+.copy-btn.copied { background: var(--success) !important; border-color: var(--success) !important; color: white; }
+#explanationContent { color: var(--text-main); font-size: 1.05rem; }
+#explanationContent code { background: #fff1f2; padding: 2px 8px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; color: #be123c; font-size: 0.9em; border: 1px solid #fecdd3; }
+#explanationContent pre { background: #1e293b; color: #f8fafc; padding: 20px; border-radius: 12px; overflow-x: auto; margin: 15px 0; border: 1px solid #334155; }
+
+@media (max-width: 1000px) { .container { grid-template-columns: 1fr; } #introOverlay h1 { font-size: 3rem; } }
+</style>
+</head>
+<body>
+<div id="introOverlay"><h1>Welcome to CodeViz</h1></div>
+<header>
+  <h2><i class="fas fa-code"></i> CodeViz</h2>
+  <div class="header-right" style="display:flex; align-items:center; gap:1rem;">
+    <nav><a href="#editor">Editor</a><a href="#visualize">Visualize</a></nav>
+    <span id="welcomeMsg" style="color:var(--primary); font-weight:600; font-size:1rem; display:none;"></span>
+    <div class="menu-container">
+        <button class="menu-btn" onclick="toggleMenu()" style="background:none;border:none;color:var(--text-main);font-size:1.4rem;cursor:pointer;">
+            <i class="fas fa-ellipsis-v"></i>
+        </button>
+        <div id="dropdownMenu" class="dropdown-content">
+            <div id="guestMenu">
+                <a href="#" onclick="openModal('loginModal')"><i class="fas fa-sign-in-alt"></i> Log In</a>
+                <a href="#" onclick="openModal('registerModal')"><i class="fas fa-user-plus"></i> Create Account</a>
+            </div>
+            <div id="userMenu" style="display:none;">
+                <a href="#" onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+            </div>
+        </div>
+    </div>
+  </div>
+</header>
+
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('loginModal')">×</span>
+        <h2 style="text-align:center;margin-bottom:20px;">Log In</h2>
+        <form id="loginForm">
+            <div class="form-group"><label>Email</label><input type="email" id="loginEmail" required></div>
+            <div class="form-group"><label>Password</label><input type="password" id="loginPass" required></div>
+            <button type="submit" class="modal-btn">Log In</button>
+        </form>
+    </div>
+</div>
+<div id="registerModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('registerModal')">×</span>
+        <h2 style="text-align:center;margin-bottom:20px;">Create Account</h2>
+        <form id="registerForm">
+            <div class="form-group"><label>Name</label><input type="text" id="regName" required></div>
+            <div class="form-group"><label>Email</label><input type="email" id="regEmail" required></div>
+            <div class="form-group"><label>Password</label><input type="password" id="regPass" required></div>
+            <button type="submit" class="modal-btn" style="background:var(--success);">Sign Up</button>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+  <section class="section full-width" id="editor">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <h2 class="section-title" style="margin:0;"><i class="fas fa-edit"></i> Code Editor</h2>
+      <select id="conceptSelector" class="concept-selector" style="width:300px;">
+        <option value="custom">✍️ My Custom Code</option>
+        <option value="cpp_vote">C++ Voting (cout/cin)</option>
+        <option value="c_calc">C Calculator (scanf)</option>
+        <option value="java_calc">Java Calculator</option>
+        <option value="py_io">Python Input/Output</option>
+        <option value="py_loop">Python Loop (Range)</option>
+        <option value="c_loop">C/C++ For Loop</option>
+        <option value="while_loop">While Loop (Java/C++)</option>
+      </select>
+    </div>
+    <div class="editor-container">
+        <textarea id="codeInput" spellcheck="false" placeholder="Type your code here..."></textarea>
+    </div>
+    <div class="controls">
+      <button class="btn btn-primary" id="runBtn"><i class="fas fa-play"></i> Run Program</button>
+      <button class="btn btn-visualize" id="visualizeBtn"><i class="fas fa-project-diagram"></i> Visualize Diagram</button>
+      <button class="btn btn-info" id="explainBtn"><i class="fas fa-chalkboard-teacher"></i> Explain Code</button>
+      <button class="btn btn-warning" id="resetBtn" disabled><i class="fas fa-redo"></i> Reset</button>
+      <button class="btn btn-success" id="copyBtn"><i class="fas fa-copy"></i> Copy Code</button>
+      <div class="speed-control">
+        <label for="speedRange">Speed:</label>
+        <input type="range" id="speedRange" min="200" max="2000" value="1000" step="100">
+        <span id="speedValue">1.0s</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section full-width" id="explanationSection" style="display:none;">
+    <h2 class="section-title"><i class="fas fa-lightbulb"></i> Code Explanation</h2>
+    <div id="explanationContent" style="line-height:1.6;"></div>
+  </section>
+
+  <section class="section" id="visualize">
+    <h2 class="section-title"><i class="fas fa-project-diagram"></i> Logic Diagram</h2>
+    <div id="flowDiagram"><p style="color:#94a3b8;">Click "Visualize" to generate diagram from code...</p></div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title"><i class="fas fa-tasks"></i> Step-by-Step Execution</h2>
+
+    <!-- NEW: Call Stack Bar -->
+    <div id="callStackBar">
+        <span class="cs-label">Call Stack</span>
+        <span id="callStackFrames"></span>
+    </div>
+
+    <!-- NEW: Step Explanation Box -->
+    <div id="stepExplanation">
+        <div class="step-num" id="stepNumLabel">Step 1</div>
+        <div id="stepExplanationText"></div>
+    </div>
+
+    <div id="animationCanvas"><p style="color:#64748b;text-align:center;margin-top:50px;">Waiting...</p></div>
+
+    <div style="margin-top:15px; border-top:1px solid #cbd5e1; padding-top:10px;">
+      <h4 style="color:#475569; margin-bottom:10px;">Memory / Variables:</h4>
+      <div id="variablesList"></div>
+    </div>
+  </section>
+  
+  <section class="section full-width" id="outputSection">
+    <h2 class="section-title"><i class="fas fa-desktop"></i> Program Result</h2>
+    <div id="outputContainer">
+        <span id="programOutput">Waiting for output...</span>
+        <div id="inlineInputWrapper">
+            <span>Input ></span>
+            <input type="text" id="inlineTerminalInput" autocomplete="off" spellcheck="false">
+        </div>
+    </div>
+  </section>
+
+  <section class="section full-width">
+    <h2 class="section-title"><i class="fas fa-terminal"></i> Console Output</h2>
+    <div class="output-console" id="outputConsole"><div class="output-line">> System Ready</div></div>
+  </section>
+</div>
+
+<footer style="text-align:center; padding:2rem; color:#64748b; font-size:0.9rem;"><p>© 2026 CodeViz - Visual Learning Platform</p></footer>
+<button id="stopBtn" class="stop-button" onclick="stopExecution()"><i class="fas fa-stop"></i></button>
+<div class="chat-bubble" onclick="toggleChat()">⚡</div>
+<div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+        <div style="display:flex; flex-direction:column;">
+            <span style="font-size:16px;">⚡ Light</span>
+            <span style="font-size:12px; opacity:0.7;">Hi, I'm Light.</span>
+        </div>
+        <span style="cursor:pointer; font-size:18px;" onclick="toggleChat()">✕</span>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+        <div class="message ai">Hi, I'm Light. How can I help you today?</div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="userInput" placeholder="Ask for code..." onkeypress="handleEnter(event)">
+        <button id="sendChatBtn" onclick="sendMessage()">→</button>
+        <button id="stopChatBtn" onclick="stopChat()" style="display:none;background:var(--danger)">⏹</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+window.copyCodeNow = function(btn) {
+    const pre = btn.nextElementSibling;
+    const code = pre.textContent || pre.innerText;
+    navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000);
+    }).catch(() => { btn.textContent = 'Error'; setTimeout(() => btn.textContent = 'COPY', 2000); });
+};
+
+setTimeout(() => {
+    const intro = document.getElementById('introOverlay');
+    intro.style.opacity = '0';
+    setTimeout(() => { intro.style.display = 'none'; }, 1000);
+}, 2000);
+
+function toggleMenu() { document.getElementById("dropdownMenu").classList.toggle("show"); }
+window.onclick = function(event) {
+  if (!event.target.matches('.menu-btn') && !event.target.matches('.fa-ellipsis-v')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    for (var i = 0; i < dropdowns.length; i++) {
+      if (dropdowns[i].classList.contains('show')) { dropdowns[i].classList.remove('show'); }
+    }
+  }
+}
+function openModal(id) { document.getElementById(id).style.display = "block"; document.getElementById("dropdownMenu").classList.remove("show"); }
+function closeModal(id) { document.getElementById(id).style.display = "none"; }
+
+const AUTH_KEY = 'codeviz_user';
+function checkAuth() {
+    const stored = localStorage.getItem(AUTH_KEY);
+    const guestMenu = document.getElementById('guestMenu');
+    const userMenu = document.getElementById('userMenu');
+    const welcomeMsg = document.getElementById('welcomeMsg');
+    if (stored) {
+        const user = JSON.parse(stored);
+        if (user.isLoggedIn) {
+            guestMenu.style.display = 'none'; userMenu.style.display = 'block';
+            welcomeMsg.style.display = 'inline-block'; welcomeMsg.innerText = `Hi, ${user.name} 👋`;
+            return;
+        }
+    }
+    guestMenu.style.display = 'block'; userMenu.style.display = 'none'; welcomeMsg.style.display = 'none';
+}
+document.getElementById('registerForm').onsubmit = (e) => { 
+    e.preventDefault(); 
+    const name = document.getElementById('regName').value;
+    const email = document.getElementById('regEmail').value;
+    const pass = document.getElementById('regPass').value;
+    localStorage.setItem(AUTH_KEY, JSON.stringify({ name, email, pass, isLoggedIn: true }));
+    alert(`Account created successfully! Welcome, ${name}.`);
+    closeModal('registerModal'); checkAuth(); 
+};
+document.getElementById('loginForm').onsubmit = (e) => { 
+    e.preventDefault(); 
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPass').value;
+    const stored = localStorage.getItem(AUTH_KEY);
+    if (stored) {
+        const user = JSON.parse(stored);
+        if (user.email === email && user.pass === pass) {
+            user.isLoggedIn = true; localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+            alert('Login successful!'); closeModal('loginModal'); checkAuth(); 
+        } else { alert('Invalid email or password.'); }
+    } else { alert('No account found. Please create an account first.'); }
+};
+window.logoutUser = function() {
+    const stored = localStorage.getItem(AUTH_KEY);
+    if (stored) { const user = JSON.parse(stored); user.isLoggedIn = false; localStorage.setItem(AUTH_KEY, JSON.stringify(user)); }
+    alert('You have been logged out.'); checkAuth();
+};
+checkAuth();
+
+const concepts = {
+  'cpp_vote': { code: `#include <iostream>\nusing namespace std;\nint main() {\n    cout << "Enter your name: ";\n    string name;\n    cin >> name;\n    cout << "Enter your age: ";\n    int age;\n    cin >> age;\n    if (age >= 18) {\n        cout << "You are old enough to vote." << endl;\n    } else {\n        cout << "Sorry, you are not old enough to vote." << endl;\n    }\n    return 0;\n}` },
+  'c_calc': { code: `#include <stdio.h>\nint main() {\n    int a, b;\n    char op;\n    printf("Enter two numbers: ");\n    scanf("%d %d", &a, &b);\n    printf("Enter operator: ");\n    scanf(" %c", &op);\n    switch(op) {\n        case '+': printf("%d", a+b); break;\n        case '-': printf("%d", a-b); break;\n        default: printf("Invalid");\n    }\n    return 0;\n}` },
+  'java_calc': { code: `import java.util.Scanner;\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        System.out.print("Num1: ");\n        double a = sc.nextDouble();\n        System.out.print("Num2: ");\n        double b = sc.nextDouble();\n        System.out.println("Sum: " + (a + b));\n    }\n}` },
+  'py_io': { code: `name = input("Your name: ")\nprint("Hello " + name)` },
+  'py_loop': { code: `for i in range(1, 6):\n    print(i)` },
+  'c_loop': { code: `#include <stdio.h>\nint main() {\n    for(int i=1; i<=5; i++) printf("%d\\n", i);\n    return 0;\n}` },
+  'while_loop': { code: `public class Main {\n    public static void main(String[] args) {\n        int i = 0;\n        while (i < 5) {\n            System.out.println(i);\n            i += 2;\n        }\n    }\n}` }
+};
+
+const editor = document.getElementById('codeInput');
+const selector = document.getElementById('conceptSelector');
+const speedRange = document.getElementById('speedRange');
+const speedValue = document.getElementById('speedValue');
+let animationSpeed = 1000;
+
+speedRange.addEventListener('input', (e) => {
+  animationSpeed = parseInt(e.target.value);
+  speedValue.textContent = (animationSpeed / 1000).toFixed(1) + 's';
+});
+selector.addEventListener('change', (e) => {
+  const val = e.target.value;
+  if (concepts[val]) editor.value = concepts[val].code;
+  else if (val === 'custom') editor.value = '';
+});
+if (!editor.value) editor.value = concepts['cpp_vote'].code;
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  navigator.clipboard.writeText(editor.value).then(() => {
+    const btn = document.getElementById('copyBtn');
+    const html = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    setTimeout(() => btn.innerHTML = html, 2000);
+  });
+});
+
+function detectLanguage(code) {
+    const lower = code.toLowerCase();
+    if (lower.includes('#include') || lower.includes('stdio.h') || lower.includes('printf') || lower.includes('scanf')) return 'c';
+    if (lower.includes('cout') || lower.includes('cin') || lower.includes('using namespace std')) return 'cpp';
+    if (lower.includes('public class') || lower.includes('system.out') || lower.includes('scanner')) return 'java';
+    return 'python'; 
+}
+
+// --- ENDPOINT CONFIGURATION ---
+// Update these URLs when you deploy your backends!
+const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? 'http://localhost:5000' 
+    : 'https://your-node-backend.onrender.com';
+
+const PYTHON_API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:5001' 
+    : 'https://your-python-backend.onrender.com';
+
+// --- SOCKET.IO REAL-TIME COMPILER ---
+const socket = io(BACKEND_URL);
+let isRunning = false;
+let shouldStop = false;
+let isSocketRunning = false;
+let lastRunCode = ''; // tracks which code produced the current output 
+
+socket.on('connect', () => console.log("Connected to Real-Time Compiler Server"));
+socket.on('connect_error', () => console.log("Cannot reach the server on port 5000."));
+
+socket.on('output', (data) => {
+    const term = document.getElementById('outputConsole');
+    const result = document.getElementById('programOutput');
+    term.innerHTML += `<div class="output-line">${escapeHtml(data)}</div>`;
+    term.scrollTop = term.scrollHeight;
+    if(result.innerText.trim() === 'Waiting for output...') result.innerText = '';
+    result.innerText += data;
+});
+
+socket.on('input_required', () => {
+    if (!isSocketRunning) return; 
+    const currentCode = editor.value;
+    const hasInputCommands = /input\s*\(|scanf\s*\(|cin\s*>>|Scanner|\.readLine/i.test(currentCode);
+    if (!hasInputCommands) { console.log("Ignored false input request."); return; }
+    const wrapper = document.getElementById('inlineInputWrapper');
+    const inputField = document.getElementById('inlineTerminalInput');
+    wrapper.style.display = 'flex';
+    inputField.value = '';
+    inputField.focus();
+    inputField.onkeydown = (e) => { 
+        if (e.key === 'Enter') { 
+            e.preventDefault(); 
+            const val = inputField.value.trim();
+            socket.emit('submit_input', val);
+            wrapper.style.display = 'none';
+            document.getElementById('programOutput').innerText += val + '\n';
+        } 
+    };
+});
+
+socket.on('finished', (code) => {
+    const term = document.getElementById('outputConsole');
+    term.innerHTML += `<div class="output-line" style="color:var(--warning)">> Program exited with code ${code}</div>`;
+    term.scrollTop = term.scrollHeight;
+    document.getElementById('inlineInputWrapper').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('runBtn').disabled = false;
+    document.getElementById('visualizeBtn').disabled = false;
+    isRunning = false;
+    isSocketRunning = false; 
+});
+
+function stopExecution() {
+    shouldStop = true; isSocketRunning = false; 
+    socket.disconnect(); 
+    setTimeout(() => socket.connect(), 1000); 
+    document.getElementById('inlineInputWrapper').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('outputConsole').innerHTML += '<div class="output-line" style="color:#E74C3C;">> Execution stopped by user</div>';
+    document.getElementById('runBtn').disabled = false;
+    document.getElementById('visualizeBtn').disabled = false;
+    isRunning = false;
+}
+
+document.getElementById('runBtn').addEventListener('click', () => {
+    if (!socket.connected) { alert("Server is Offline! Please run 'node server.js' in your terminal."); return; }
+    let code = editor.value.trim();
+    if (!code) return;
+    const language = detectLanguage(code);
+    if (language === 'java') code = code.replace(/public\s+class\s+([A-Za-z0-9_]+)/g, 'class $1');
+    lastRunCode = editor.value.trim(); // save raw code before any transformation
+    shouldStop = false; isRunning = true; isSocketRunning = true; 
+    document.getElementById('stopBtn').style.display = 'flex';
+    document.getElementById('runBtn').disabled = true;
+    document.getElementById('visualizeBtn').disabled = true;
+    document.getElementById('resetBtn').disabled = false;
+    document.getElementById('inlineInputWrapper').style.display = 'none';
+    document.getElementById('programOutput').innerText = 'Running...\n';
+    document.getElementById('outputConsole').innerHTML = '<div class="output-line">> Compiling & Executing...</div>';
+    document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    socket.emit('run_code', { code, language });
+});
+
+// =====================================================
+// VISUALIZE — ENHANCED TO DEFEAT THE BLACK BOX
+// =====================================================
+document.getElementById('visualizeBtn').addEventListener('click', async () => {
+    let code = editor.value.trim();
+    if (!code) return;
+
+    shouldStop = false; isRunning = true;
+
+    document.getElementById('stopBtn').style.display = 'flex';
+    document.getElementById('runBtn').disabled = true;
+    document.getElementById('visualizeBtn').disabled = true;
+    document.getElementById('resetBtn').disabled = false;
+    document.getElementById('variablesList').innerHTML = ''; 
+    document.getElementById('flowDiagram').innerHTML = '<p style="color:#64748b;">Generating diagram...</p>';
+
+    // Reset call stack + explanation UI
+    document.getElementById('callStackBar').style.display = 'none';
+    document.getElementById('stepExplanation').style.display = 'none';
+
+
+
+    // 1. Generate Logic Diagram
+    const diagramCode = generateDynamicDiagram(code);
+    try {
+        const uniqueId = 'mermaidGraph_' + Date.now();
+        const { svg } = await mermaid.render(uniqueId, diagramCode);
+        document.getElementById('flowDiagram').innerHTML = svg;
+    } catch (e) {
+        document.getElementById('flowDiagram').innerHTML = '<p style="color:red;">Diagram failed to generate.</p>';
+    }
+
+    // 2. AI TRACE
+    const canvas = document.getElementById('animationCanvas');
+    canvas.innerHTML = '<p style="color:#0ea5e9;text-align:center;margin-top:50px;"><i class="fas fa-brain fa-spin"></i> AI is analyzing code and mapping execution state...</p>';
+
+    let outputText = document.getElementById('programOutput').innerText;
+    // Only use saved output if it came from THIS exact code, otherwise send empty
+    if (outputText.includes('Waiting for output...') || outputText.includes('Running...') || lastRunCode !== code) outputText = '';
+
+    try {
+        const response = await fetch(`${PYTHON_API_URL}/generate_trace`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code, output: outputText })
+        });
+
+        if (!response.ok) throw new Error("AI Trace Failed");
+        const traceData = await response.json();
+
+        // Build code line viewer
+        const lines = code.split('\n');
+        canvas.innerHTML = '';
+        lines.forEach((line, i) => {
+            const div = document.createElement('div');
+            div.className = 'code-line';
+            div.id = `line-${i}`;
+            div.innerText = line || ' ';
+            canvas.appendChild(div);
+        });
+
+        // Play the AI trace frame-by-frame
+        for (const step of traceData) {
+            if (shouldStop || !isRunning) break;
+
+            // Clear previous active states
+            document.querySelectorAll('.code-line').forEach(el => {
+                el.classList.remove('active', 'active-call', 'active-return', 'active-error', 'active-skip');
+            });
+
+            const action = (step.action || 'highlight').toLowerCase();
+            const lineNum = (step.line || 1) - 1;
+
+            // Handle skip steps — show a pill instead of highlighting a line
+            if (action === 'skip') {
+                const pill = document.createElement('div');
+                pill.className = 'skip-pill';
+                pill.textContent = step.explanation || '... steps skipped ...';
+                canvas.appendChild(pill);
+                await new Promise(r => setTimeout(r, animationSpeed));
+                continue;
+            }
+
+            // Highlight the current line with action-specific color
+            const el = document.getElementById(`line-${lineNum}`);
+            if (el) {
+                if (action === 'call')        el.classList.add('active-call');
+                else if (action === 'return') el.classList.add('active-return');
+                else if (action === 'error')  el.classList.add('active-error');
+                else                          el.classList.add('active');
+                canvas.scrollTop = el.offsetTop - canvas.offsetTop - (canvas.clientHeight / 2);
+            }
+
+            // Update Call Stack bar
+            if (step.call_stack && step.call_stack.length > 0) {
+                const bar = document.getElementById('callStackBar');
+                const frames = document.getElementById('callStackFrames');
+                bar.style.display = 'block';
+                frames.innerHTML = step.call_stack.map((f, i) =>
+                    `<span class="cs-frame">${escapeHtml(f)}</span>${i < step.call_stack.length - 1 ? '<span class="cs-arrow">›</span>' : ''}`
+                ).join('');
+            } else {
+                document.getElementById('callStackBar').style.display = 'none';
+            }
+
+            // Update Step Explanation box
+            if (step.explanation) {
+                const box = document.getElementById('stepExplanation');
+                box.style.display = 'block';
+                document.getElementById('stepNumLabel').textContent = `Step ${step.step}`;
+                document.getElementById('stepExplanationText').textContent = step.explanation;
+            }
+
+            // Update Memory — handles primitives, arrays, AND objects
+            if (step.memory_state) {
+                renderVariables(step.memory_state);
+            }
+
+            await new Promise(r => setTimeout(r, animationSpeed));
+        }
+
+    } catch (err) {
+        console.error(err);
+        canvas.innerHTML = '<p style="color:red;text-align:center;margin-top:50px;">Error: AI could not map the trace. Did you run the program first to generate terminal output?</p>';
+    } finally {
+        isRunning = false;
+        document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('runBtn').disabled = false;
+        document.getElementById('visualizeBtn').disabled = false;
+    }
+});
+
+mermaid.initialize({ startOnLoad: false, theme: 'default' });
+function generateDynamicDiagram(code) {
+  const lines = code.split('\n').filter(l => { const t = l.trim(); return t.length > 1 && !t.startsWith('//') && !t.startsWith('#'); });
+  let graph = "graph TD\n    Start([Start])\n";
+  let prev = "Start"; let id = 0;
+  lines.forEach(line => {
+    let cleanText = line.trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/[':;{}()\[\]]/g, '').substring(0, 30);
+    if (!cleanText) cleanText = "Step"; 
+    const node = `N${id++}`; const lower = line.toLowerCase();
+    if (lower.includes('if') || lower.includes('else') || lower.includes('switch') || lower.includes('case')) { graph += `    ${prev} --> ${node}{"${cleanText}"}\n`; }
+    else if (lower.includes('for') || lower.includes('while') || lower.includes('do') || lower.includes('foreach')) { graph += `    ${prev} --> ${node}(("${cleanText}"))\n`; }
+    else if (lower.includes('print') || lower.includes('cout') || lower.includes('printf') || lower.includes('log') || lower.includes('system.out')) { graph += `    ${prev} --> ${node}[/"${cleanText}"/]\n`; }
+    else if (lower.includes('scanf') || lower.includes('cin') || lower.includes('input') || lower.includes('scanner') || lower.includes('read')) { graph += `    ${prev} --> ${node}[/"${cleanText}"/]\n`; }
+    else if (lower.includes('def') || lower.includes('function') || lower.includes('void') || lower.includes('class') || lower.includes('struct')) { graph += `    ${prev} --> ${node}[["${cleanText}"]]\n`; }
+    else if (lower.includes('return') || lower.includes('break') || lower.includes('continue')) { graph += `    ${prev} --> ${node}(["${cleanText}"])\n`; }
+    else { graph += `    ${prev} --> ${node}["${cleanText}"]\n`; }
+    prev = node;
+  });
+  graph += `    ${prev} --> End([End])`;
+  return graph;
+}
+
+// FIXED renderVariables — handles objects, arrays, and primitives
+function renderVariables(vars) {
+    const list = document.getElementById('variablesList');
+    list.innerHTML = '';
+    for (const [key, value] of Object.entries(vars)) {
+        const badge = document.createElement('div');
+        badge.className = 'var-badge';
+
+        // Stringify complex values (arrays, objects) so they display properly
+        let displayVal;
+        let isComplex = false;
+        if (typeof value === 'object' && value !== null) {
+            displayVal = JSON.stringify(value);
+            isComplex = true;
+        } else {
+            displayVal = String(value);
+        }
+
+        const valSpan = document.createElement('span');
+        valSpan.className = 'var-value' + (isComplex ? ' is-complex' : '');
+        valSpan.textContent = displayVal;
+        valSpan.title = displayVal; // full value on hover
+
+        badge.appendChild(document.createTextNode(key + ' = '));
+        badge.appendChild(valSpan);
+        list.appendChild(badge);
+    }
+}
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+    document.getElementById('animationCanvas').innerHTML = '<p style="color:#64748b;text-align:center;margin-top:50px;">Waiting...</p>';
+    document.getElementById('programOutput').innerText = 'Waiting for output...';
+    document.getElementById('outputConsole').innerHTML = '<div class="output-line">> System Ready</div>';
+    document.getElementById('flowDiagram').innerHTML = '<p style="color:#64748b;">Click "Visualize" to generate diagram...</p>';
+    document.getElementById('visualizeBtn').disabled = false;
+    document.getElementById('runBtn').disabled = false;
+    document.getElementById('resetBtn').disabled = true;
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('inlineInputWrapper').style.display = 'none';
+    document.getElementById('variablesList').innerHTML = '';
+    document.getElementById('explanationSection').style.display = 'none';
+    document.getElementById('callStackBar').style.display = 'none';
+    document.getElementById('stepExplanation').style.display = 'none';
+    lastRunCode = '';
+    isSocketRunning = false;
+});
+
+document.getElementById('explainBtn').addEventListener('click', async () => {
+    const code = editor.value.trim();
+    if (!code) { alert("Please enter code to explain!"); return; }
+    const explanationSection = document.getElementById('explanationSection');
+    const contentDiv = document.getElementById('explanationContent');
+    explanationSection.style.display = 'block';
+    contentDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing code...';
+    explanationSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    try {
+        const response = await fetch(`${PYTHON_API_URL}/chat`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: "Please analyze the following code and format your response exactly like this:\n\n1. **The Code:** (Show the exact code inside a syntax-highlighted block)\n2. **Command Lines:** (Show the terminal commands needed to compile and run this specific language)\n3. **Brief Explanation:** (Give a concise, step-by-step breakdown of how the logic works)\n\nHere is the code:\n\n" + code })
+        });
+        if (!response.ok) throw new Error("Server error");
+        const reader = response.body.getReader(); const decoder = new TextDecoder(); let accumulated = "";
+        contentDiv.innerHTML = ""; 
+        while (true) {
+            const { done, value } = await reader.read(); if (done) break;
+            accumulated += decoder.decode(value, {stream: true});
+            contentDiv.innerHTML = marked.parse(accumulated, { breaks: true, gfm: true });
+            contentDiv.querySelectorAll('pre code').forEach((block) => { hljs.highlightElement(block); });
+        }
+    } catch (err) { contentDiv.innerHTML = `<span style="color:red;">Error getting explanation: ${err.message}</span>`; }
+});
+
+let abortController = null; 
+function toggleChat() { const w = document.getElementById('chatWindow'); w.style.display = (w.style.display === 'flex') ? 'none' : 'flex'; }
+function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+function stopChat() {
+    if (abortController) {
+        abortController.abort(); abortController = null;
+        document.getElementById('sendChatBtn').style.display = 'block';
+        document.getElementById('stopChatBtn').style.display = 'none';
+        const msgs = document.getElementById('chatMessages');
+        msgs.innerHTML += `<div class="message ai" style="color:red;font-style:italic;">[Stopped by user]</div>`;
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+}
+async function sendMessage() {
+    const input = document.getElementById('userInput'); const msgs = document.getElementById('chatMessages');
+    const sendBtn = document.getElementById('sendChatBtn'); const stopBtn = document.getElementById('stopChatBtn');
+    const text = input.value.trim(); if (!text) return;
+    const userDiv = document.createElement('div'); userDiv.className = 'message user'; userDiv.textContent = text; msgs.appendChild(userDiv);
+    input.value = '';
+    const aiBubble = document.createElement('div'); aiBubble.className = 'message ai'; aiBubble.innerHTML = '<i>thinking...</i>'; msgs.appendChild(aiBubble);
+    msgs.scrollTop = msgs.scrollHeight;
+    sendBtn.style.display = 'none'; stopBtn.style.display = 'block';
+    abortController = new AbortController();
+    try {
+        const response = await fetch(`${PYTHON_API_URL}/chat`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text }), signal: abortController.signal
+        });
+        if (!response.ok) throw new Error("Server error");
+        const reader = response.body.getReader(); const decoder = new TextDecoder(); let accumulated = "";
+        while (true) {
+            const { done, value } = await reader.read(); if (done) break;
+            accumulated += decoder.decode(value, {stream: true});
+            processAndDisplayMarkdown(accumulated, aiBubble); msgs.scrollTop = msgs.scrollHeight;
+        }
+    } catch (err) {
+        if (err.name !== 'AbortError') { aiBubble.innerHTML = `<span style="color:#e74c3c;">Error: ${escapeHtml(err.message || "Connection failed")}<br>Is python agent.py running on port 5001?</span>`; }
+    } finally { sendBtn.style.display = 'block'; stopBtn.style.display = 'none'; abortController = null; }
+}
+function processAndDisplayMarkdown(markdown, targetElement) {
+    let html = marked.parse(markdown, { breaks: true, gfm: true });
+    const temp = document.createElement('div'); temp.innerHTML = html;
+    temp.querySelectorAll('pre').forEach(pre => {
+        const wrapper = document.createElement('div'); wrapper.className = 'code-wrapper';
+        const copyBtn = document.createElement('button'); copyBtn.className = 'copy-btn'; copyBtn.textContent = 'COPY';
+        copyBtn.onclick = function() { window.copyCodeNow(this); };
+        const newPre = pre.cloneNode(true); wrapper.appendChild(copyBtn); wrapper.appendChild(newPre); pre.replaceWith(wrapper);
+    });
+    targetElement.innerHTML = temp.innerHTML;
+    targetElement.querySelectorAll('pre code').forEach(block => { if (!block.classList.contains('hljs')) hljs.highlightElement(block); });
+}
+document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList.contains('copy-btn')) {
+        e.preventDefault(); e.stopPropagation();
+        const button = e.target; const pre = button.nextElementSibling; if (!pre) return;
+        const code = pre.textContent || pre.innerText;
+        navigator.clipboard.writeText(code).then(() => {
+            button.textContent = 'Copied!'; button.classList.add('copied');
+            setTimeout(() => { button.textContent = 'COPY'; button.classList.remove('copied'); }, 2000);
+        }).catch(err => { console.error('Copy failed:', err); button.textContent = 'Failed'; setTimeout(() => { button.textContent = 'COPY'; }, 2000); });
+    }
+});
+function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+</script>
+</body>
+</html>
