@@ -644,13 +644,8 @@ function detectLanguage(code) {
 
 // --- ENDPOINT CONFIGURATION ---
 // Update these URLs when you deploy your backends!
-const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-    ? 'http://localhost:5000' 
-    : 'https://codeviz-node-backend.onrender.com';
-
-const PYTHON_API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5001' 
-    : 'https://codevizard.onrender.com';
+const BACKEND_URL = 'https://codeviz-node-backend.onrender.com';
+const PYTHON_API_URL = 'https://codevizard.onrender.com';
 
 // --- SOCKET.IO REAL-TIME COMPILER ---
 const socket = io(BACKEND_URL);
